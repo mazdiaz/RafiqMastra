@@ -8,7 +8,10 @@
     "dev": "node scripts/dev-with-litellm-proxy.mjs",
     "dev:mastra": "mastra dev",
     "build": "mastra build",
-    "start": "mastra start"
+    "start": "mastra start",
+    "dev:web": "npm --prefix web-app run dev",
+    "build:web": "npm --prefix web-app run build",
+    "test:web": "npm --prefix web-app test"
   },
   "keywords": [],
   "author": "",
