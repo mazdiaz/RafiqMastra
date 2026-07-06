@@ -1,0 +1,14 @@
+output.txt 
+node_modules 
+dist 
+.mastra 
+.superpowers/
+.env.development 
+.env 
+*.log
+*.db 
+*.db-* 
+.netlify 
+.vercel 
+*.duckdb 
+*.duckdb.wal 
