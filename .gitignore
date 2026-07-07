@@ -10,5 +10,6 @@ dist
 *.db-* 
 .netlify 
 .vercel 
+web-app/.next/
 *.duckdb 
 *.duckdb.wal 
