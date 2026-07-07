@@ -11,11 +11,21 @@ export type ChatResponse = {
 type MastraGenerateResponse = {
   text?: unknown;
   runId?: unknown;
-  messages?: Array<{
-    role?: unknown;
-    content?: unknown;
-  }>;
+  messages?: unknown;
 };
+
+type MastraMessage = {
+  role?: unknown;
+  content?: unknown;
+};
+
+function isMastraGenerateResponse(data: unknown): data is MastraGenerateResponse {
+  return data !== null && typeof data === "object";
+}
+
+function isMastraMessage(message: unknown): message is MastraMessage {
+  return message !== null && typeof message === "object";
+}
 
 export function normalizeBaseUrl(value: string | undefined): string {
   const baseUrl = value?.trim() || "http://localhost:4111/api";
@@ -51,7 +61,14 @@ export function buildMastraGenerateBody(request: ChatRequest) {
   };
 }
 
-export function normalizeMastraResponse(data: MastraGenerateResponse): ChatResponse {
+export function normalizeMastraResponse(data: unknown): ChatResponse {
+  if (!isMastraGenerateResponse(data)) {
+    return {
+      text: "The agent responded, but no readable text was returned.",
+      runId: undefined,
+    };
+  }
+
   const runId = typeof data.runId === "string" ? data.runId : undefined;
 
   if (typeof data.text === "string" && data.text.trim()) {
@@ -61,10 +78,14 @@ export function normalizeMastraResponse(data: MastraGenerateResponse): ChatRespo
     };
   }
 
-  const assistantMessage = data.messages
-    ?.slice()
-    .reverse()
-    .find((message) => message.role === "assistant");
+  const assistantMessage = Array.isArray(data.messages)
+    ? data.messages
+        .slice()
+        .reverse()
+        .find((message): message is MastraMessage => {
+          return isMastraMessage(message) && message.role === "assistant";
+        })
+    : undefined;
 
   if (assistantMessage) {
     const content = assistantMessage.content;
