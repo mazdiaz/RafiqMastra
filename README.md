@@ -36,3 +36,23 @@ The [Mastra platform](https://projects.mastra.ai) provides two products for depl
 - **Server**: A production deployment target that runs your Mastra application as an API server
 
 Learn more in the [Mastra platform documentation](https://mastra.ai/docs/mastra-platform/overview).
+
+## Next.js Chat App
+
+The `web-app/` directory contains a small Next.js chat UI for the local Mastra Web Explorer Agent.
+
+Start the Mastra backend from the repository root:
+
+```shell
+npm run dev
+```
+
+In another terminal, start the web app from the repository root:
+
+```shell
+npm run dev:web
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+The web UI calls `/api/chat`, which forwards requests to the local Mastra API at `http://localhost:4111/api` using `MASTRA_AGENT_ID=web-explorer-agent`. No LiteLLM gateway key is used in the browser; gateway secrets stay in the root Mastra `.env` file.
