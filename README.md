@@ -16,7 +16,7 @@ Create a `.env` file first:
 copy .env.example .env
 ```
 
-Then put your LiteLLM gateway key in `OPENAI_API_KEY`. This project routes Mastra through a local LiteLLM compatibility proxy at `http://localhost:4120/v1`, which forwards to `https://llm.rafiqspace.ai/v1` with `MASTRA_MODEL=openai/qwen3.6-35b-a3b`.
+Then put your LiteLLM gateway key in `OPENAI_API_KEY`. This project routes Mastra through a local LiteLLM compatibility proxy at `http://localhost:4120/v1`, which normalizes Qwen/vLLM message ordering and forwards to `https://llm.rafiqspace.ai/v1` with `MASTRA_MODEL=qwen3.6-35b-a3b`.
 
 Open [http://localhost:4111](http://localhost:4111) in your browser to access [Mastra Studio](https://mastra.ai/docs/studio/overview). It provides an interactive UI for building and testing your agents, along with a REST API that exposes your Mastra application as a local service. This lets you start building without worrying about integration right away.
 

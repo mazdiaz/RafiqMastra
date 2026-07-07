@@ -43,7 +43,7 @@ assert.match(
   'web-explorer-agent instructions should prevent Qwen from sending stringified numeric/boolean tool args',
 );
 assert.doesNotMatch(agentSource, /weatherTool|Weather Agent|weather assistant/, 'web-explorer-agent should not keep weather-specific behavior');
-assert.match(agentSource, /new Memory|@mastra\/memory/, 'web-explorer-agent should keep memory so browser context has thread/resource state');
+assert.match(agentSource, /new Memory|@mastra\/memory/, 'web-explorer-agent should keep memory because AgentBrowser browser context requires it');
 assert.match(agentSource, /providerId:\s*'openai'/, 'web-explorer-agent should use OpenAI-compatible chat routing for the LiteLLM gateway');
 assert.match(agentSource, /url:\s*process\.env\.OPENAI_BASE_URL/, 'web-explorer-agent should pass OPENAI_BASE_URL through model config');
 assert.match(agentSource, /apiKey:\s*process\.env\.OPENAI_API_KEY/, 'web-explorer-agent should pass OPENAI_API_KEY through model config');
@@ -98,6 +98,7 @@ assert.equal(
 );
 
 assert.equal(typeof litellmProxy.rewriteRequestBody, 'function', 'LiteLLM proxy should export request body rewriting for regression coverage');
+assert.equal(typeof litellmProxy.rewriteResponseBody, 'function', 'LiteLLM proxy should export response body rewriting for regression coverage');
 
 const rewrittenResponsesBody = JSON.parse(litellmProxy.rewriteRequestBody(JSON.stringify({
   model: 'qwen3.6-35b-a3b',
@@ -117,4 +118,42 @@ assert.equal(
   rewrittenResponsesBody.input[0].content,
   'agent instructions\n\nbrowser instructions',
   'LiteLLM proxy should merge Responses API system input content',
+);
+
+const rewrittenChatResponse = JSON.parse(litellmProxy.rewriteResponseBody(JSON.stringify({
+  choices: [
+    {
+      message: {
+        role: 'assistant',
+        content: [{ type: 'text', text: 'hello' }],
+        reasoning_content: [{ type: 'text', text: 'thinking' }],
+        tool_calls: [
+          {
+            id: 'tool-1',
+            function: {
+              name: 'browser_goto',
+              arguments: { url: 'https://example.com' },
+            },
+          },
+        ],
+      },
+      finish_reason: 'tool_calls',
+    },
+  ],
+})));
+
+assert.equal(
+  rewrittenChatResponse.choices[0].message.content,
+  'hello',
+  'LiteLLM proxy should normalize array content to strings for the OpenAI-compatible parser',
+);
+assert.equal(
+  rewrittenChatResponse.choices[0].message.reasoning_content,
+  'thinking',
+  'LiteLLM proxy should normalize array reasoning content to strings for the OpenAI-compatible parser',
+);
+assert.equal(
+  rewrittenChatResponse.choices[0].message.tool_calls[0].function.arguments,
+  '{"url":"https://example.com"}',
+  'LiteLLM proxy should normalize object tool arguments to JSON strings for the OpenAI-compatible parser',
 );
