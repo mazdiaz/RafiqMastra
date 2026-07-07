@@ -106,15 +106,24 @@ export async function POST(request: Request) {
 
   let data: unknown = {};
 
-  if (text) {
-    try {
-      data = JSON.parse(text);
-    } catch {
-      return NextResponse.json(
-        { error: "Mastra returned a response that was not valid JSON." },
-        { status: 502 },
-      );
+  if (!text.trim()) {
+    if (!response.ok) {
+      return NextResponse.json({ error: getUpstreamError(data, response.status) }, { status: 502 });
     }
+
+    return NextResponse.json(
+      { error: "Mastra returned a response that was not valid JSON." },
+      { status: 502 },
+    );
+  }
+
+  try {
+    data = JSON.parse(text);
+  } catch {
+    return NextResponse.json(
+      { error: "Mastra returned a response that was not valid JSON." },
+      { status: 502 },
+    );
   }
 
   if (!response.ok) {
